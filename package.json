@@ -1,0 +1,25 @@
+{
+  "name": "class-autoloader",
+  "version": "1.0.0",
+  "description": "A class autoloader, just like Rails class autoloader ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fredxiaoF/class-autoloader.git"
+  },
+  "keywords": [
+    "autoload",
+    "class",
+    "rails",
+    "reload"
+  ],
+  "author": "Fred Shaw",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fredxiaoF/class-autoloader/issues"
+  },
+  "homepage": "https://github.com/fredxiaoF/class-autoloader#readme"
+}
