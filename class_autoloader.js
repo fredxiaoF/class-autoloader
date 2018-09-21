@@ -1,10 +1,13 @@
 const Path = require('path');
 const FS = require('fs');
+const EagerLoader = require('./eager_loader');
 
 module.exports = class ClassAutoloader {
   
   constructor(config={}){
     this.config = config;
+    
+    this.eager_loader = new EagerLoader(config);
     
     if (!Reflect.has(config, 'autoload_paths')) throw "config.autoload_paths required!"
     
@@ -13,6 +16,10 @@ module.exports = class ClassAutoloader {
     this._set_global_class_namescope();
     
     this._proxy_global_variables();
+    
+    if (config.eager_load) {
+      this.eager_loader.load();
+    }
   }
     
   
