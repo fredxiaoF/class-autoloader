@@ -79,6 +79,9 @@ $ touch app/controllers/my_scope/one_class.js
 MyScope.OneClass // will cause autoload one_class.js
 ```
 
+## Eager load
+Set cache_classes and cache_classes with true, classes will be autoloaded before call it 
+
 
 ## License
 The MIT License, 2018 [Fred Shaw](https://github.com/fredxiaoF) ([@FredShawF](https://twitter.com/FredShawF))

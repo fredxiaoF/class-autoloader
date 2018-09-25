@@ -17,7 +17,7 @@ module.exports = class ClassAutoloader {
     
     this._proxy_global_variables();
     
-    if (config.eager_load) {
+    if (config.cache_classes && config.eager_load) {
       this.eager_loader.load();
     }
   }
