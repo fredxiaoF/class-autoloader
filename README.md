@@ -80,7 +80,7 @@ MyScope.OneClass // will cause autoload one_class.js
 ```
 
 ## Eager load
-Set cache_classes and cache_classes with true, classes will be autoloaded before call it 
+Set cache_classes and eager_loader with true, classes will be autoloaded before call it 
 
 
 ## License
