@@ -39,7 +39,11 @@ module.exports = class ClassAutoloader {
   _proxy_autoload(obj, is_global_level = false) {
     return new Proxy(obj, {
       get: (tar, attr) => {
-        return this.load(attr, is_global_level ? null : tar);
+        if (tar[attr] && tar[attr].mtimeMs) {
+          this.load(attr, is_global_level ? null : tar);
+        } else {
+          return tar[attr] || this.load(attr, is_global_level ? null : tar);
+        }
       }
     });
   }
@@ -79,9 +83,8 @@ module.exports = class ClassAutoloader {
     // 根据class_name创建一个命名空间类
     let klass = new Function();
     Reflect.defineProperty(klass, 'name', {value: class_name});
-    Reflect.defineProperty(klass, 'mtimeMs', {emumerable: false, writable: true});
+    Reflect.defineProperty(klass, 'isDirectory', {emumerable: false, writable: true, value: true});
     klass.path = full_path;
-    klass.mtimeMs = file_stat.mtimeMs;
     
     // 设置命名空间类的自动加载
     klass = this._proxy_autoload(klass);
@@ -94,8 +97,7 @@ module.exports = class ClassAutoloader {
   
   _load_file(class_name, full_path, file_stat, super_scope=null){
     let klass = require(full_path);
-    Reflect.defineProperty(klass, 'mtimeMs', {emumerable: false, writable: true});
-    klass.mtimeMs = file_stat.mtimeMs;
+    Reflect.defineProperty(klass, 'mtimeMs', {emumerable: false, writable: true, value: file_stat.mtimeMs});
     
     this._save_cache(klass, class_name, super_scope);
     
@@ -118,7 +120,11 @@ module.exports = class ClassAutoloader {
     } else {
       delete global.classes[class_name];
     }
-    delete require.cache[require.resolve(full_file_path)];
+    
+    try {
+      delete require.cache[require.resolve(full_file_path)];
+    } catch (e) { 
+    }
   }
   
   
@@ -126,12 +132,22 @@ module.exports = class ClassAutoloader {
     let filename = this._underscore_case(class_name);
     let [full_file_path, file_stat] = this._detect_file(filename, super_scope);
     
-    if (klass.mtimeMs <= file_stat.mtimeMs) {
+    if (!file_stat) {
       this._remove_cache(full_file_path, class_name, super_scope);
-      return false
-    } else {
-      return true;
+      return false;
     }
+    
+    if (!klass.isDirectory === file_stat.isDirectory()) {
+      this._remove_cache(full_file_path, class_name, super_scope);
+      return false;
+    }
+    
+    if (!klass.isDirectory && klass.mtimeMs < file_stat.mtimeMs) {
+      this._remove_cache(full_file_path, class_name, super_scope);
+      return false;
+    }
+    
+    return true;
   }
   
   
@@ -151,16 +167,24 @@ module.exports = class ClassAutoloader {
   
   
   _parse_file(full_path) {
+    let stat = null;
+    let dump_stat = null;
     try {
-      let stat = FS.lstatSync(full_path + '.js');
+      stat = FS.lstatSync(full_path + '.js');
+      try {
+        dump_stat = FS.lstatSync(full_path);
+      } catch (e) {}
+      
+      if (!dump_stat) return [full_path, stat];
+    } catch (e) {}
+    
+    if (dump_stat) throw new DumplicateNameError(`Dumplicate namespace at: ${full_path}`);
+    
+    try {
+      stat = FS.lstatSync(full_path);
       return [full_path, stat];
     } catch (e) {
-      try {
-        let stat = FS.lstatSync(full_path);
-        return [full_path, stat];
-      } catch (e) {
-        return [];
-      }
+      return [];
     }
   }
   
@@ -173,7 +197,7 @@ module.exports = class ClassAutoloader {
   
   
   
-  
-  
-  
+}
+
+class DumplicateNameError extends Error {
 }
