@@ -1,6 +1,6 @@
 {
   "name": "class-autoloader",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A class autoloader, just like Rails class autoloader ",
   "main": "index.js",
   "scripts": {

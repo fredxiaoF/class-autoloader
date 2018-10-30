@@ -40,7 +40,7 @@ module.exports = class ClassAutoloader {
     return new Proxy(obj, {
       get: (tar, attr) => {
         if (tar[attr] && tar[attr].mtimeMs) {
-          this.load(attr, is_global_level ? null : tar);
+          return this.load(attr, is_global_level ? null : tar);
         } else {
           return tar[attr] || this.load(attr, is_global_level ? null : tar);
         }
